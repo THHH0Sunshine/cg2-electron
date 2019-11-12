@@ -1,0 +1,30 @@
+<html>
+  <head>
+    <title>Start Server - Card Game 2</title>
+    <script>
+      const { ipcRenderer } = require('electron')
+
+      function start(join) {
+        document.getElementById('buttons').style.display = 'none'
+        document.getElementById('starting').style.display = 'block'
+        let options = {
+          join,
+          startWebServer: document.getElementById('option-startwebserver').checked
+        }
+        ipcRenderer.send('start-server', options)
+      }
+    </script>
+  </head>
+  <body>
+    <h1>START SERVER</h1>
+    <button onclick="location.href='index.html'">BACK</button>
+    <div>
+      <input id="option-startwebserver" type="checkbox">Start Web Server
+    </div>
+    <div id="buttons">
+      <button onclick="start(false)">START SERVER</button>
+      <button onclick="start(true)">START SERVER AND JOIN</button>
+    </div>
+    <div id="starting" style="display:none;">STARTING SERVER...</div>
+  </body>
+</html>
