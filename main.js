@@ -1,5 +1,5 @@
 // Modules to control application life and create native browser window
-const {app, BrowserWindow, Menu, ipcMain} = require('electron')
+const {app, BrowserWindow, Menu, ipcMain, dialog} = require('electron')
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -61,7 +61,7 @@ const menu = Menu.buildFromTemplate([
   {
     label: 'Server',
     submenu: [
-      { label: 'Server Status...', id: 'server-status', enabled: false, click: () => mainWindow.loadFile('web/status.html') },
+      { label: 'Server Status...', id: 'server-status', enabled: false, click: serverStatus },
       { type: 'separator' },
       { label: 'Start Server...', id: 'start-server', click: () => mainWindow.loadFile('web/start.html') },
       { label: 'Stop Server', id: 'stop-server', enabled: false, click: stopServer }
@@ -77,7 +77,8 @@ const menu = Menu.buildFromTemplate([
   {
     label: 'Debug',
     submenu: [
-      { role: 'toggledevtools' }
+      { role: 'toggledevtools' },
+      { label: 'test', click: test }
     ]
   }
 ])
@@ -87,6 +88,23 @@ const stopServerMenu = menu.getMenuItemById('stop-server')
 const serverStatusMenu = menu.getMenuItemById('server-status')
 const joinGameMenu = menu.getMenuItemById('join-game')
 const leaveGameMenu = menu.getMenuItemById('leave-game')
+
+function serverStatus() {
+  let msg = ''
+  for (let k of Object.keys(server.options)) {
+    msg += k + ' : ' + server.options[k] + '\n'
+  }
+  dialog.showMessageBox(mainWindow, {
+    title: 'Server Status',
+    message: 'Local Server',
+    detail: msg,
+    buttons: ['Stop Server', 'OK']
+  }).then(r => {
+    if (r.response == 0) {
+      stopServer()
+    }
+  })
+}
 
 function startServer(options) {
   if (!server) {
@@ -104,7 +122,8 @@ function startServer(options) {
         if (options.join) {
           joinGame()
         } else {
-          mainWindow.loadFile('web/status.html')
+          mainWindow.loadFile('web/index.html')
+          serverStatus()
         }
       }
       console.log('[stdout] ' + d)
@@ -139,7 +158,11 @@ function removeServer() {
 }
 
 function createGame() {
-  mainWindow.loadFile(server ? 'web/status.html' : 'web/start.html')
+  if (server) {
+    serverStatus()
+  } else {
+    mainWindow.loadFile('web/start.html')
+  }
 }
 
 function joinGame(host) {
@@ -148,7 +171,6 @@ function joinGame(host) {
     joinGameMenu.enabled = false
     leaveGameMenu.enabled = true
     startServerMenu.enabled = false
-    serverStatusMenu.enabled = false
     mainWindow.loadFile('client/index.html', host ? { query: { wshost: host } } : undefined)
   }
 }
@@ -159,9 +181,17 @@ function leaveGame() {
     joinGameMenu.enabled = true
     leaveGameMenu.enabled = false
     startServerMenu.enabled = server == null
-    serverStatusMenu.enabled = server != null
     mainWindow.loadFile('web/index.html')
   }
+}
+
+function test() {
+  dialog.showMessageBox(mainWindow, {
+    title: 'My Dialog',
+    message: 'Hello world!',
+    detail: 'Hello XJTU!',
+    buttons: ['OK']
+  })
 }
 
 Menu.setApplicationMenu(menu)
