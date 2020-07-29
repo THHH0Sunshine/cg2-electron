@@ -129,7 +129,16 @@ function startServer(options) {
       console.log('[stdout] ' + d)
     })
     process.stderr.on('data', d => console.log('[stderr] ' + d))
-    process.on('error', er => console.log('[error] ' + er))
+    process.on('error', er => {
+      removeServer()
+      dialog.showMessageBox(mainWindow, {
+        title: 'Error',
+        message: 'Server Process Error',
+        detail: er + '\nYou may have to kill the server process (java) by yourself (if it is not stopped).',
+        buttons: ['OK']
+      })
+      console.log('[error] ' + er)
+    })
     process.on('exit', (code, signal) => {
       removeServer()
       console.log('[exit] code=' + code + ',signal=' + signal)
@@ -155,6 +164,7 @@ function removeServer() {
   }
   stopServerMenu.enabled = false
   serverStatusMenu.enabled = false
+  mainWindow.loadFile('web/index.html')
 }
 
 function createGame() {

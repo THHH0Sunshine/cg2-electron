@@ -1,5 +1,11 @@
 {
   "name": "cg2",
   "version": "0.1.0",
-  "main": "main.js"
+  "main": "main.js",
+  "devDependencies": {
+    "electron": "^9.1.1"
+  },
+  "scripts": {
+    "start": "electron ."
+  }
 }
